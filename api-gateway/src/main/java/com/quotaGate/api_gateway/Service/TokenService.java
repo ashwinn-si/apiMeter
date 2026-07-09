@@ -1,7 +1,7 @@
-package com.quotaGate.main_service.Service;
+package com.quotaGate.api_gateway.Service;
 
 
-import com.quotaGate.main_service.DTO.JwtDTO;
+import com.quotaGate.api_gateway.DTO.JwtDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

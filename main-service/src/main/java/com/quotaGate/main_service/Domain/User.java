@@ -1,9 +1,6 @@
 package com.quotaGate.main_service.Domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +14,7 @@ import static com.quotaGate.main_service.Utils.TimeUtil.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "UserDetail")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

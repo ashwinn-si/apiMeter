@@ -5,19 +5,20 @@ import com.quotaGate.main_service.DTO.CustomError;
 import com.quotaGate.main_service.Domain.SendEmailDTO;
 import com.quotaGate.main_service.Domain.User;
 import com.quotaGate.main_service.Repository.UserRepository;
-import com.quotaGate.main_service.Utils.TimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class MainService {
-    @Autowired
-    private UserService userService;
-    private UserRepository userRepository;
-    private EmailClient emailClient;
-    private TokenService tokenService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final EmailClient emailClient;
+    private final TokenService tokenService;
 
+    @Transactional
     public void createUser(String email){
 
         boolean isUserExists = userService.isUserExists(email);
@@ -27,21 +28,24 @@ public class MainService {
         }
 
         User user = new User(email);
+
         userRepository.save(user);
 
         generateOtp(email, "OTP TO Activate Account");
+
+
     }
 
     public void generateOtpForTokenGeneration(String email, String subject){
         boolean isUserExists = userService.isUserExistsAndIsActive(email);
 
         if(!isUserExists){
-            throw  new CustomError(HttpStatus.CONFLICT, "User NotFound");
+            throw  new CustomError(HttpStatus.CONFLICT, "User Not Activated");
         }
 
         Integer otp = userService.generateOtp(email);
 
-        sendEmail(email, subject, "Your OTP: " + otp);
+        sendEmail(email, subject, "Your OTPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP: " + otp);
     }
 
     public String checkOtpAndGenerateToken(String email, Integer otp){
@@ -55,7 +59,9 @@ public class MainService {
             throw new CustomError(HttpStatus.CONFLICT, "Invalid Action");
         }
 
-        String  token = tokenService.generateToken(email);
+        User user = userService.findUserByEmail(email);
+
+        String token = tokenService.generateToken(email, user.getId());
 
         return token;
     }
@@ -78,6 +84,11 @@ public class MainService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void clearDatabase(){
+        userRepository.deleteAll();
+    }
+
 
     public void generateOtp(String email, String subject){
         boolean isUserExists = userService.isUserExists(email);
@@ -88,7 +99,7 @@ public class MainService {
 
         Integer otp = userService.generateOtp(email);
 
-        sendEmail(email, subject, "Your OTP: " + otp);
+        sendEmail(email, subject, "Your OTPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP: " + otp);
     }
 
     private void sendEmail(String toEmail, String subject, String body){

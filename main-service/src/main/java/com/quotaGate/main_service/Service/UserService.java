@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private  UserRepository userRepository;
 
 
     public Boolean isUserExists(Integer id){
@@ -49,9 +50,10 @@ public class UserService {
 
         User userData = user.get();
 
-        if(TimeUtil.isValid(userData.getOtpGeneratedAt(), 15) && userData.getOtp() == otp){
+        if(TimeUtil.isValid(userData.getOtpGeneratedAt(), 15) && userData.getOtp().equals(otp)){
             return true;
         }
+
         return false;
     }
 
@@ -64,6 +66,8 @@ public class UserService {
         User userData = user.get();
 
         userData.setOtpGeneratedAt(TimeUtil.getCurrentTime());
+
+        userRepository.save(userData);
 
         return userData.getOtp();
     }
