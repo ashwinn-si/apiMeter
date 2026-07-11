@@ -26,8 +26,6 @@ export default function GenerateTokenOtpVerification() {
       });
 
       setResponse(JSON.stringify(res, null, 2));
-      setEmail('');
-      setOtp('');
     } catch (error: any) {
       setResponse(error?.message || 'An error occurred');
     } finally {

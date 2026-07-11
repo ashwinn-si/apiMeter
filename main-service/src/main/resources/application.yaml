@@ -5,6 +5,11 @@ spring:
   application:
     name: main-service
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   datasource:
     url: jdbc:mysql://localhost:3306/rateLimiter
     username: root
@@ -45,3 +50,11 @@ eureka:
 jwt:
   secret: asdsadknasdiasndi123123sadisand123021312
   expirationTime: 1500000
+
+redis:
+  ttl: 15
+  bucketRefreshTime: 5
+  noTokenAllowed: 5
+  tokenBucket:
+    noTokenPerMin: 1
+

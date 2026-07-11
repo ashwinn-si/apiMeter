@@ -20,7 +20,6 @@ export default function GenerateTokenOtp() {
       });
 
       setResponse(JSON.stringify(res, null, 2));
-      setEmail('');
     } catch (error: any) {
       setResponse(error?.message || 'An error occurred');
     } finally {

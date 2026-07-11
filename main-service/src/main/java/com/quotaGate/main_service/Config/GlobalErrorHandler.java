@@ -14,7 +14,7 @@ public class GlobalErrorHandler {
 
     @ExceptionHandler(CustomError.class)
     public ResponseEntity<?> handleCustomException(CustomError customError){
-        return ResponseHandler.handleResponse(customError.getStatusCode(), null, customError.getMessage());
+        return ResponseHandler.handleResponse(customError.getStatusCode(), customError.getData(), customError.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -29,6 +29,7 @@ public class GlobalErrorHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleOtherException(Exception ex){
+        System.out.println(ex.getMessage());
         return ResponseHandler.handleResponse(HttpStatus.INTERNAL_SERVER_ERROR, null, ex.getMessage());
     }
 }

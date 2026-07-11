@@ -2,13 +2,41 @@ package com.quotaGate.main_service.Service;
 
 import com.quotaGate.main_service.Config.EmailClient;
 import com.quotaGate.main_service.DTO.CustomError;
+import com.quotaGate.main_service.DTO.RedisDTO;
 import com.quotaGate.main_service.Domain.SendEmailDTO;
 import com.quotaGate.main_service.Domain.User;
+import com.quotaGate.main_service.Enums.RATELIMITER;
+import com.quotaGate.main_service.RateLimiter.RateLimiterInterface;
+import com.quotaGate.main_service.RateLimiter.SlidingWindowRateLimiter;
+import com.quotaGate.main_service.RateLimiter.TokenBucketRateLimiter;
 import com.quotaGate.main_service.Repository.UserRepository;
+import com.quotaGate.main_service.Utils.TimeUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class ApiResponse{
+    String message;
+    Integer noRequestRemaining;
+}
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class ApiErrorResponse{
+    String message;
+    String remainingTime;
+}
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +45,12 @@ public class MainService {
     private final UserRepository userRepository;
     private final EmailClient emailClient;
     private final TokenService tokenService;
+    private final SlidingWindowRateLimiter slidingWindowRateLimiter;
+    private final TokenBucketRateLimiter tokenBucketRateLimiter;
+
+
+    @Value("${redis.noTokenAllowed}")
+    private Integer noTokenAllowed;
 
     @Transactional
     public void createUser(String email){
@@ -102,6 +136,39 @@ public class MainService {
         sendEmail(email, subject, "Your OTPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP: " + otp);
     }
 
+
+    public ApiResponse generateResponseData(String token, RATELIMITER method){
+        RateLimiterInterface rateLimiter = null;
+        if(method == RATELIMITER.SLIDING_WINDOW){
+            rateLimiter = slidingWindowRateLimiter;
+        }else if(method == RATELIMITER.TOKEN_BUCKET){
+            rateLimiter = tokenBucketRateLimiter;
+        }else{
+            throw new CustomError(HttpStatus.CONFLICT, "METHOD NOT FOUND IN SERVICE");
+        }
+
+        boolean isRedisExists = rateLimiter.isKeyExists(token);
+
+        if(!isRedisExists){
+            rateLimiter.saveData(new RedisDTO(token, TimeUtil.getCurrentTime(), noTokenAllowed));
+        }
+
+        RedisDTO redisDTO = rateLimiter.getDataAndRefreshBucket(token);
+
+        if(redisDTO.getNoTimesUsed() <= 0){
+            Duration duration = rateLimiter.howMuchTimeToRefresh(token);
+            Long mins = duration.getSeconds() / 60;
+            Long secs =  duration.getSeconds() - (mins * 60);
+            throw new CustomError(HttpStatus.CONFLICT, "Rate Limited",  new ApiErrorResponse("Rate Limited", mins + ":"+secs));
+        }
+
+        redisDTO.setNoTimesUsed(redisDTO.getNoTimesUsed() - 1);
+
+        rateLimiter.saveData(redisDTO);
+
+        return new ApiResponse("THIS IS WHAT YOU WANTED", redisDTO.getNoTimesUsed() + 1);
+    }
+
     private void sendEmail(String toEmail, String subject, String body){
         try{
             SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
@@ -111,6 +178,7 @@ public class MainService {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
 
 
 

@@ -1,5 +1,6 @@
 package com.quotaGate.main_service.Controller;
 
+import com.quotaGate.main_service.Enums.RATELIMITER;
 import com.quotaGate.main_service.Service.MainService;
 import com.quotaGate.main_service.Utils.ResponseHandler;
 import jakarta.validation.Valid;
@@ -11,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Data
 @AllArgsConstructor
@@ -81,4 +79,17 @@ public class MainController {
         mainService.clearDatabase();
         return ResponseHandler.handleResponse(HttpStatus.OK, null, "Database Cleared");
     }
+
+
+    @GetMapping("/private/get-data-slidingwindow/{token}")
+    public ResponseEntity<?> getResponseDateSlidingWindow(@PathVariable String token){
+        return ResponseHandler.handleResponse(HttpStatus.OK, mainService.generateResponseData(token, RATELIMITER.SLIDING_WINDOW), "Token Generated");
+    }
+
+    @GetMapping("/private/get-data-tokenbucket/{token}")
+    public ResponseEntity<?> getResponseDateTokenBucket(@PathVariable String token){
+        return ResponseHandler.handleResponse(HttpStatus.OK, mainService.generateResponseData(token, RATELIMITER.TOKEN_BUCKET), "Token Generated");
+    }
+
+
 }

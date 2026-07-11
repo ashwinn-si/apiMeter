@@ -45,16 +45,20 @@ const handleSuccess = <T>(response: ApiResponse<T>): ApiResponse<T> => {
   return response;
 };
 
-const handleError = (error: AxiosError<ApiErrorResponse>): never => {
+const handleError = <T>(error: AxiosError<ApiErrorResponse>): ApiResponse<T> => {
   const message = error.response?.data?.message ?? error.message ?? 'Something went wrong';
 
   toast.error(message);
 
-  throw error;
+  console.log(error.response?.data);
+  return error.response?.data as ApiResponse<T>;
 };
 
 export const apiHelper = {
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T> | ApiErrorResponse> {
     try {
       const { data } = await api.get<ApiResponse<T>>(url, config);
       return handleSuccess(data);
@@ -63,7 +67,11 @@ export const apiHelper = {
     }
   },
 
-  async post<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T>(
+    url: string,
+    body?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T> | ApiErrorResponse> {
     try {
       const { data } = await api.post<ApiResponse<T>>(url, body, config);
       return handleSuccess(data);
@@ -72,7 +80,11 @@ export const apiHelper = {
     }
   },
 
-  async put<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async put<T>(
+    url: string,
+    body?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T> | ApiErrorResponse> {
     try {
       const { data } = await api.put<ApiResponse<T>>(url, body, config);
       return handleSuccess(data);
@@ -81,7 +93,10 @@ export const apiHelper = {
     }
   },
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async delete<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T> | ApiErrorResponse> {
     try {
       const { data } = await api.delete<ApiResponse<T>>(url, config);
       return handleSuccess(data);

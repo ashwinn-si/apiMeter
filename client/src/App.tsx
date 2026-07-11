@@ -3,6 +3,8 @@ import ActivateAccount from './sections/ActivateAccount';
 import ActivateAccountOtpResend from './sections/ActivateAccountOtpResend';
 import GenerateTokenOtp from './sections/GenerateTokenOtp';
 import GenerateTokenOtpVerification from './sections/GenerateTokenOtpVerification';
+import GetResponseContentTokenBucket from './sections/GetResponseContentTokenBucket';
+import GetResponseContentSlidingWindow from './sections/GetResponseContentSlidingWindow';
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
           <ActivateAccountOtpResend />
           <GenerateTokenOtp />
           <GenerateTokenOtpVerification />
+          <GetResponseContentTokenBucket />
+          <GetResponseContentSlidingWindow />
         </div>
       </div>
     </div>

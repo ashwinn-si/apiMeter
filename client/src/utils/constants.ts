@@ -4,4 +4,6 @@ export const API_ENDPOINTS = {
   RESEND_ACTIVATION_OTP: '/main/public/resend-otp-activation',
   GENERATE_TOKEN_OTP: '/main/public/generate-otp-token',
   VERIFY_TOKEN_OTP: '/main/public/generate-token',
+  GENERATE_RESPONSE_DATA_SLIDING_WINDOW: '/main/private/get-data-slidingwindow',
+  GENERATE_RESPONSE_DATA_TOKEN_BUCKET: '/main/private/get-data-tokenbucket',
 };

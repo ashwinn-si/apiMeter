@@ -26,7 +26,6 @@ export default function CreateAccount() {
 
       console.log(user);
       setResponse(JSON.stringify(user, null, 2));
-      setEmail('');
     } catch (error: any) {
       setResponse(error?.message || 'An error occurred');
     } finally {
