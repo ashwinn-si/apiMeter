@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import CreateAccount from './sections/CreateAccount';
+import './index.css';
 import ActivateAccount from './sections/ActivateAccount';
 import ActivateAccountOtpResend from './sections/ActivateAccountOtpResend';
 import GenerateTokenOtp from './sections/GenerateTokenOtp';
@@ -7,23 +9,58 @@ import GetResponseContentTokenBucket from './sections/GetResponseContentTokenBuc
 import GetResponseContentSlidingWindow from './sections/GetResponseContentSlidingWindow';
 
 export default function App() {
-  return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans p-8">
-      <div className="max-w-xl mx-auto space-y-8">
-        <div className="border-b pb-4 mb-8">
-          <h1 className="text-2xl font-bold">API Meter</h1>
-          <p className="text-gray-600 text-sm">Rate-Limiter Frontend</p>
-        </div>
+  const [activeTab, setActiveTab] = useState<'account' | 'token' | 'rate-limits'>('account');
 
-        <div className="flex flex-col gap-8">
-          <CreateAccount />
-          <ActivateAccount />
-          <ActivateAccountOtpResend />
-          <GenerateTokenOtp />
-          <GenerateTokenOtpVerification />
-          <GetResponseContentTokenBucket />
-          <GetResponseContentSlidingWindow />
-        </div>
+  return (
+    <div className="app-container">
+      <div className="app-header">
+        <h1 className="app-title">API Meter</h1>
+        <p className="app-subtitle">Rate-Limiter Testing Dashboard</p>
+      </div>
+
+      <div className="tab-nav">
+        <button
+          className={`tab-button ${activeTab === 'account' ? 'active' : ''}`}
+          onClick={() => setActiveTab('account')}
+        >
+          Account Setup
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'token' ? 'active' : ''}`}
+          onClick={() => setActiveTab('token')}
+        >
+          Token Auth
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'rate-limits' ? 'active' : ''}`}
+          onClick={() => setActiveTab('rate-limits')}
+        >
+          Rate Limits
+        </button>
+      </div>
+
+      <div className="tab-content">
+        {activeTab === 'account' && (
+          <div className="flex flex-col gap-6">
+            <CreateAccount />
+            <ActivateAccount />
+            <ActivateAccountOtpResend />
+          </div>
+        )}
+
+        {activeTab === 'token' && (
+          <div className="flex flex-col gap-6">
+            <GenerateTokenOtp />
+            <GenerateTokenOtpVerification />
+          </div>
+        )}
+
+        {activeTab === 'rate-limits' && (
+          <div className="flex flex-col gap-6">
+            <GetResponseContentTokenBucket />
+            <GetResponseContentSlidingWindow />
+          </div>
+        )}
       </div>
     </div>
   );
