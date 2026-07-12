@@ -1,7 +1,7 @@
-package com.quotaGate.main_service.Config;
+package com.quotaGate.auth_service.Config;
 
-import com.quotaGate.main_service.Enums.LOG_TYPE;
-import com.quotaGate.main_service.Utils.AppLogger;
+import com.quotaGate.auth_service.Enums.LOG_TYPE;
+import com.quotaGate.auth_service.Utils.AppLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;

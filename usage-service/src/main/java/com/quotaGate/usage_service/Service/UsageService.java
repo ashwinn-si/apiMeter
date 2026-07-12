@@ -1,12 +1,12 @@
-package com.quotaGate.main_service.Service;
+package com.quotaGate.usage_service.Service;
 
-import com.quotaGate.main_service.DTO.CustomError;
-import com.quotaGate.main_service.DTO.UsageDTO;
-import com.quotaGate.main_service.Domain.Usage;
-import com.quotaGate.main_service.Enums.LOG_TYPE;
-import com.quotaGate.main_service.Repository.UsageRepository;
-import com.quotaGate.main_service.Utils.AppLogger;
-import com.quotaGate.main_service.Utils.TimeUtil;
+import com.quotaGate.usage_service.DTO.CustomError;
+import com.quotaGate.usage_service.DTO.UsageDTO;
+import com.quotaGate.usage_service.Domain.Usage;
+import com.quotaGate.usage_service.Enums.LOG_TYPE;
+import com.quotaGate.usage_service.Repository.UsageRepository;
+import com.quotaGate.usage_service.Utils.AppLogger;
+import com.quotaGate.usage_service.Utils.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;

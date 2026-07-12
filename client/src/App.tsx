@@ -9,6 +9,7 @@ import GetResponseContentTokenBucket from './sections/GetResponseContentTokenBuc
 import GetResponseContentSlidingWindow from './sections/GetResponseContentSlidingWindow';
 import apiHelper from './utils/apiHelper';
 import { API_ENDPOINTS } from './utils/constants';
+import UsageInfo from './sections/UsageInfo';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'account' | 'token' | 'rate-limits'>('account');
@@ -66,6 +67,7 @@ export default function App() {
 
         {activeTab === 'rate-limits' && (
           <div className="flex flex-col gap-6">
+            <UsageInfo />
             <GetResponseContentTokenBucket />
             <GetResponseContentSlidingWindow />
           </div>

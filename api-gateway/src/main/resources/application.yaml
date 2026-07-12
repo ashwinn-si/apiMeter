@@ -13,8 +13,17 @@ spring:
             uri: lb://MAIN-SERVICE
             predicates:
               - Path=/main/**
-            filters:
-              - RewritePath=/main/(?<segment>.*), /${segment}
+
+          - id: auth-service-route
+            uri: lb://AUTH-SERVICE
+            predicates:
+              - Path=/auth/**
+
+          - id: usage-service-route
+            uri: lb://USAGE-SERVICE
+            predicates:
+              - Path=/usage/**
+
 
     openfeign:
       micrometer:

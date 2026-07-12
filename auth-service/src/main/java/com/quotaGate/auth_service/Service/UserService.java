@@ -1,9 +1,9 @@
-package com.quotaGate.main_service.Service;
+package com.quotaGate.auth_service.Service;
 
-import com.quotaGate.main_service.DTO.CustomError;
-import com.quotaGate.main_service.Domain.User;
-import com.quotaGate.main_service.Repository.UserRepository;
-import com.quotaGate.main_service.Utils.TimeUtil;
+import com.quotaGate.auth_service.DTO.CustomError;
+import com.quotaGate.auth_service.Domain.User;
+import com.quotaGate.auth_service.Repository.UserRepository;
+import com.quotaGate.auth_service.Utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

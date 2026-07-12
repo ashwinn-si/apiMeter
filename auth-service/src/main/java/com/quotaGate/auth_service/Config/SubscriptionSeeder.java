@@ -1,9 +1,9 @@
-package com.quotaGate.main_service.Config;
+package com.quotaGate.auth_service.Config;
 
-import com.quotaGate.main_service.Domain.Subscription;
-import com.quotaGate.main_service.Enums.LOG_TYPE;
-import com.quotaGate.main_service.Repository.SubscriptionRepository;
-import com.quotaGate.main_service.Utils.AppLogger;
+import com.quotaGate.auth_service.Domain.Subscription;
+import com.quotaGate.auth_service.Enums.LOG_TYPE;
+import com.quotaGate.auth_service.Repository.SubscriptionRepository;
+import com.quotaGate.auth_service.Utils.AppLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
