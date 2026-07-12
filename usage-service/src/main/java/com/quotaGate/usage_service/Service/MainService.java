@@ -19,16 +19,17 @@ import org.springframework.stereotype.Service;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class HandleUsageLimitResponse{
+class HandleUsageLimitResponse {
     private boolean isError;
     private String message;
     private String remainingTimeToRefresh;
 }
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class UsageLimitResponse{
+class UsageLimitResponse {
     private String percentage;
     private Long noTimesUsed;
     private Long allowedCount;
@@ -43,7 +44,7 @@ public class MainService {
     private final UsageService usageService;
     private final TokenService tokenService;
 
-    public UsageLimitResponse usageLimitInfo(String token){
+    public UsageLimitResponse usageLimitInfo(String token) {
         JwtDTO jwtDTO = tokenService.getJwtClaims(token);
         Long userId = jwtDTO.getId();
 
@@ -51,9 +52,12 @@ public class MainService {
 
         Long noTimesUsed = usageDTO.getNoOfTimesUsed();
         Long noAllowedUse = usageDTO.getAllowedUsageCount();
-        String percentage = "%d%".formatted((noTimesUsed / noAllowedUse) * 100);
 
-        return new UsageLimitResponse(percentage, noTimesUsed, noAllowedUse, usageService.getTimeToRefresh(usageDTO));
+        String percentage =
+                noAllowedUse == 0 ? "0%" : "%.0f%%".formatted((noTimesUsed * 100.0) / noAllowedUse);
+
+        return new UsageLimitResponse(percentage, noTimesUsed, noAllowedUse,
+                usageService.getTimeToRefresh(usageDTO));
     }
 
     public HandleUsageLimitResponse handleUsageLimit(Long userId) {
@@ -62,7 +66,7 @@ public class MainService {
         if (usageDTO.getNoOfTimesUsed() >= usageDTO.getAllowedUsageCount()) {
             String timeToRefresh = usageService.getTimeToRefresh(usageDTO);
 
-            return new HandleUsageLimitResponse(true, "Your Today Limit Completed",timeToRefresh);
+            return new HandleUsageLimitResponse(true, "Your Today Limit Completed", timeToRefresh);
         }
 
         usageDTO.setNoOfTimesUsed(usageDTO.getNoOfTimesUsed() + 1);
@@ -74,27 +78,34 @@ public class MainService {
         return new HandleUsageLimitResponse(false, "Limit Updated", "");
     }
 
-    public void sendUsageWarningEmail(Long userId, UsageDTO usageDTO){
+    public void sendUsageWarningEmail(Long userId, UsageDTO usageDTO) {
         String emailId = usageDTO.getEmailId();
         Long noTimesUsed = usageDTO.getNoOfTimesUsed();
         Long noAllowedUse = usageDTO.getAllowedUsageCount();
-        Long percentage = (noTimesUsed / noAllowedUse) * 100;
-        if(percentage >= 80){
-            sendEmail(emailId, "USAGE LIMIT ALERT", "HELLOO USER \n " +
-                    "You have already used %d of the daily limit \n kindly be conscious about the usage".formatted(percentage));
+        double percentage = (noTimesUsed * 100.0) / noAllowedUse;
+
+        if (percentage >= 80) {
+            sendEmail(emailId, "USAGE LIMIT ALERT", """
+                    Hello User,
+
+                    You have already used %.0f%% of your daily limit.
+                    Kindly be conscious about your usage.
+                    """.formatted(percentage));
         }
     }
 
-    private UsageDTO getUsageFromRedis(Long userId){
-        //checking if the usage exists
+    private UsageDTO getUsageFromRedis(Long userId) {
+        // checking if the usage exists
         boolean isPresentInCache = usageService.isExists(userId);
         if (!isPresentInCache) {
             Usage usage = usageService.getUsageFromDatabase(userId);
             Long allowedUsageCount = usage.getUser().getSubscription().getNoOfAllowedRequest();
-            //saving to the cache
-            usageService.saveDate(userId, new UsageDTO(userId, usage.getId(), usage.getUser().getEmail(), usage.getNoOfTimeUsed(), allowedUsageCount, usage.getLastTimeUsed()));
+            // saving to the cache
+            usageService.saveDate(userId,
+                    new UsageDTO(userId, usage.getId(), usage.getUser().getEmail(),
+                            usage.getNoOfTimeUsed(), allowedUsageCount, usage.getLastTimeUsed()));
         }
-        return  usageService.refreshValueAndGetData(userId);
+        return usageService.refreshValueAndGetData(userId);
     }
 
     private void sendEmail(String toEmail, String subject, String body) {
