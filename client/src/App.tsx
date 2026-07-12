@@ -7,15 +7,24 @@ import GenerateTokenOtp from './sections/GenerateTokenOtp';
 import GenerateTokenOtpVerification from './sections/GenerateTokenOtpVerification';
 import GetResponseContentTokenBucket from './sections/GetResponseContentTokenBucket';
 import GetResponseContentSlidingWindow from './sections/GetResponseContentSlidingWindow';
+import apiHelper from './utils/apiHelper';
+import { API_ENDPOINTS } from './utils/constants';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'account' | 'token' | 'rate-limits'>('account');
-
+  function clearDatabase() {
+    apiHelper.delete(API_ENDPOINTS.CLEAR_DATABASE);
+  }
   return (
     <div className="app-container">
       <div className="app-header">
-        <h1 className="app-title">API Meter</h1>
-        <p className="app-subtitle">Rate-Limiter Testing Dashboard</p>
+        <div>
+          <h1 className="app-title">API Meter</h1>
+          <p className="app-subtitle">Rate-Limiter Testing Dashboard</p>
+        </div>
+        <button className="clear-button" onClick={() => clearDatabase()}>
+          clear database
+        </button>
       </div>
 
       <div className="tab-nav">

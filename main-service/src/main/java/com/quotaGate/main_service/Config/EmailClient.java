@@ -1,6 +1,6 @@
 package com.quotaGate.main_service.Config;
 
-import com.quotaGate.main_service.Domain.SendEmailDTO;
+import com.quotaGate.main_service.DTO.SendEmailDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

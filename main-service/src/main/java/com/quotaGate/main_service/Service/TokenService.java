@@ -70,7 +70,7 @@ public class TokenService {
 
         JwtDTO jwtDTO = new JwtDTO();
         jwtDTO.setEmail(claims.get("email", String.class));
-        jwtDTO.setId(claims.get("id", Integer.class));
+        jwtDTO.setId(claims.get("id", Long.class));
 
         return jwtDTO;
     }

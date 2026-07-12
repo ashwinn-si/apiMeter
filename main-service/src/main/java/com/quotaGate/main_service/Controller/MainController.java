@@ -19,6 +19,15 @@ import org.springframework.web.bind.annotation.*;
 @NoArgsConstructor
 class CreateUserDTO{
     private String email;
+    private Integer subscriptionId;
+}
+
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class OtpGenerationDTO{
+    private String email;
 }
 
 @Data
@@ -46,13 +55,18 @@ public class MainController {
 
     @PostMapping("/public/create-account")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserDTO  createUserDTO){
-        mainService.createUser(createUserDTO.getEmail());
+        mainService.createUser(createUserDTO.getEmail(), createUserDTO.getSubscriptionId());
         return ResponseHandler.handleResponse(HttpStatus.OK, null,"Otp Generated Check Email Index / Spam");
     }
 
+    @GetMapping("/public/get-subscription")
+    public ResponseEntity<?> getAllSubscription(){
+        return ResponseHandler.handleResponse(HttpStatus.OK, mainService.getAllSubscription(),"All Subscriptions");
+    }
+
     @PostMapping("/public/resend-otp-activation")
-    public ResponseEntity<?> generateTokenActivation(@RequestBody @Valid CreateUserDTO createUserDTO){
-        mainService.generateOtp(createUserDTO.getEmail(), "OTP to Activate Account");
+    public ResponseEntity<?> generateTokenActivation(@RequestBody @Valid OtpGenerationDTO otpGenerationDTO){
+        mainService.generateOtp(otpGenerationDTO.getEmail(), "OTP to Activate Account");
         return ResponseHandler.handleResponse(HttpStatus.OK, null, "Otp Generated Check Email Index / Spam");
     }
 
@@ -63,8 +77,8 @@ public class MainController {
     }
 
     @PostMapping("/public/generate-otp-token")
-    public ResponseEntity<?> generateTokenOtp(@RequestBody @Valid CreateUserDTO createUserDTO){
-        mainService.generateOtpForTokenGeneration(createUserDTO.getEmail(), "OTP to Generate Token");
+    public ResponseEntity<?> generateTokenOtp(@RequestBody @Valid OtpGenerationDTO otpGenerationDTO){
+        mainService.generateOtpForTokenGeneration(otpGenerationDTO.getEmail(), "OTP to Generate Token");
         return ResponseHandler.handleResponse(HttpStatus.OK, null, "Otp Generated Check Email Index / Spam");
     }
 
@@ -90,6 +104,7 @@ public class MainController {
     public ResponseEntity<?> getResponseDateTokenBucket(@PathVariable String token){
         return ResponseHandler.handleResponse(HttpStatus.OK, mainService.generateResponseData(token, RATELIMITER.TOKEN_BUCKET), "Token Generated");
     }
+
 
 
 }

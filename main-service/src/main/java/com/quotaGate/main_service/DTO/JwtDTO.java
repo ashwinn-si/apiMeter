@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtDTO {
     private String email;
-    private Integer id;
+    private Long id;
 }

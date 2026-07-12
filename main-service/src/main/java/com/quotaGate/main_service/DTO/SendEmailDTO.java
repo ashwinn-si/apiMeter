@@ -1,4 +1,4 @@
-package com.quotaGate.main_service.Domain;
+package com.quotaGate.main_service.DTO;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

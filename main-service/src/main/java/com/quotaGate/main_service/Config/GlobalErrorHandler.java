@@ -1,6 +1,8 @@
 package com.quotaGate.main_service.Config;
 
 import com.quotaGate.main_service.DTO.CustomError;
+import com.quotaGate.main_service.Enums.LOG_TYPE;
+import com.quotaGate.main_service.Utils.AppLogger;
 import com.quotaGate.main_service.Utils.ResponseHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ public class GlobalErrorHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleOtherException(Exception ex){
-        System.out.println(ex.getMessage());
+        AppLogger.log(LOG_TYPE.ERROR, "GLOBAL ERROR HANDLER", ex.getMessage());
         return ResponseHandler.handleResponse(HttpStatus.INTERNAL_SERVER_ERROR, null, ex.getMessage());
     }
 }

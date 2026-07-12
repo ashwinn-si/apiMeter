@@ -1,4 +1,6 @@
 export const API_ENDPOINTS = {
+  CLEAR_DATABASE: '/main/public/clear-db',
+  GET_ALL_SUBSCRIPTION: '/main/public/get-subscription',
   CREATE_ACCOUNT: '/main/public/create-account',
   ACTIVATE_ACCOUNT: '/main/public/activate-account',
   RESEND_ACTIVATION_OTP: '/main/public/resend-otp-activation',

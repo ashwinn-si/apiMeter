@@ -29,8 +29,16 @@ public class User {
 
     private LocalDateTime otpGeneratedAt;
 
-    public User(String email){
+    @ManyToOne
+    @JoinColumn(name  = "subscription_id")
+    private Subscription subscription;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Usage usage;
+
+    public User(String email, Subscription subscription){
         this.email = email;
+        this.subscription = subscription;
         this.otp = (int)(Math.random() * 10000 + 2000 + (Math.random() * 200));
         this.isVerified = false;
         this.otpGeneratedAt = getCurrentTime();
