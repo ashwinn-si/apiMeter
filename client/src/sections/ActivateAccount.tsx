@@ -32,9 +32,7 @@ export default function ActivateAccount() {
   return (
     <SectionWrapper title="Activate Account" response={response} loading={loading}>
       <div>
-        <label htmlFor="activate-email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
+        <label htmlFor="activate-email">Email Address</label>
         <input
           id="activate-email"
           type="email"
@@ -42,14 +40,11 @@ export default function ActivateAccount() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
         />
       </div>
 
       <div>
-        <label htmlFor="activate-otp" className="block text-sm font-medium text-gray-700 mb-1">
-          OTP
-        </label>
+        <label htmlFor="activate-otp">OTP</label>
         <input
           id="activate-otp"
           type="number"
@@ -57,16 +52,14 @@ export default function ActivateAccount() {
           value={otp}
           onChange={e => setOtp(e.target.value)}
           disabled={loading}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
         />
       </div>
 
       <button
         onClick={handleActivateAccount}
         disabled={loading || !email.trim() || !otp.trim()}
-        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? 'Activating...' : 'Activate'}
+        {loading ? 'Activating...' : 'Activate Account'}
       </button>
     </SectionWrapper>
   );

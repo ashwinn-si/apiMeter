@@ -33,7 +33,6 @@ export default function CreateAccount() {
         subscriptionId: selectedSubscriptionId,
       });
 
-      console.log(user);
       setResponse(JSON.stringify(user, null, 2));
     } catch (error: any) {
       setResponse(error?.message || 'An error occurred');
@@ -70,18 +69,7 @@ export default function CreateAccount() {
   return (
     <SectionWrapper title="Create Account" response={response} loading={loading}>
       <div>
-        <label
-          htmlFor="create-email"
-          style={{
-            display: 'block',
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '6px',
-          }}
-        >
-          Email Address
-        </label>
-
+        <label htmlFor="create-email">Email Address</label>
         <input
           id="create-email"
           type="email"
@@ -89,61 +77,22 @@ export default function CreateAccount() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '6px',
-            marginBottom: '20px',
-            boxSizing: 'border-box',
-          }}
         />
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <div
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '10px',
-          }}
-        >
-          Select Subscription
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}
-        >
+      <div>
+        <label>Select Subscription</label>
+        <div className="subscription-grid">
           {subscriptions.map(subscription => {
             const selected = selectedSubscriptionId === subscription.id;
-
             return (
               <div
                 key={subscription.id}
                 onClick={() => setSelectedSubscriptionId(subscription.id)}
-                style={{
-                  cursor: 'pointer',
-                  border: selected ? '2px solid #2563eb' : '1px solid #d1d5db',
-                  backgroundColor: selected ? '#dbeafe' : '#fff',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  minWidth: '150px',
-                  transition: 'all 0.2s ease',
-                  userSelect: 'none',
-                }}
+                className={`subscription-card ${selected ? 'selected' : ''}`}
               >
-                <div
-                  style={{
-                    fontSize: '13px',
-                    color: '#666',
-                  }}
-                >
-                  {subscription.value}
-                </div>
+                <div className="subscription-card-badge">Plan</div>
+                <div className="subscription-card-value">{subscription.value}</div>
               </div>
             );
           })}
@@ -153,19 +102,6 @@ export default function CreateAccount() {
       <button
         onClick={handleCreateAccount}
         disabled={loading || !email.trim() || selectedSubscriptionId === null}
-        style={{
-          width: '100%',
-          padding: '12px',
-          backgroundColor:
-            loading || !email.trim() || selectedSubscriptionId === null ? '#9ca3af' : '#2563eb',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '6px',
-          cursor:
-            loading || !email.trim() || selectedSubscriptionId === null ? 'not-allowed' : 'pointer',
-          fontSize: '15px',
-          fontWeight: 600,
-        }}
       >
         {loading ? 'Creating...' : 'Create Account'}
       </button>

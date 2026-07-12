@@ -28,11 +28,9 @@ export default function ActivateAccountOtpResend() {
   };
 
   return (
-    <SectionWrapper title="Resend OTP For Account Activation " response={response}>
+    <SectionWrapper title="Resend Activation OTP" response={response} loading={loading}>
       <div>
-        <label htmlFor="resend-email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
+        <label htmlFor="resend-email">Email Address</label>
         <input
           id="resend-email"
           type="email"
@@ -40,16 +38,14 @@ export default function ActivateAccountOtpResend() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
         />
       </div>
 
       <button
         onClick={handleResendOtp}
         disabled={loading || !email.trim()}
-        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? 'Sending...' : 'Resend OTP For Account Activation  Account Activation'}
+        {loading ? 'Sending...' : 'Resend OTP'}
       </button>
     </SectionWrapper>
   );

@@ -13,9 +13,11 @@ import UsageInfo from './sections/UsageInfo';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'account' | 'token' | 'rate-limits'>('account');
+
   function clearDatabase() {
     apiHelper.delete(API_ENDPOINTS.CLEAR_DATABASE);
   }
+
   return (
     <div className="app-container">
       <div className="app-header">
@@ -24,7 +26,23 @@ export default function App() {
           <p className="app-subtitle">Rate-Limiter Testing Dashboard</p>
         </div>
         <button className="clear-button" onClick={() => clearDatabase()}>
-          clear database
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6M14 11v6" />
+            <path d="M9 6V4h6v2" />
+          </svg>
+          Clear DB
         </button>
       </div>
 
@@ -49,9 +67,9 @@ export default function App() {
         </button>
       </div>
 
-      <div className="tab-content">
+      <div className="tab-content" key={activeTab}>
         {activeTab === 'account' && (
-          <div className="flex flex-col gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <CreateAccount />
             <ActivateAccount />
             <ActivateAccountOtpResend />
@@ -59,14 +77,14 @@ export default function App() {
         )}
 
         {activeTab === 'token' && (
-          <div className="flex flex-col gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <GenerateTokenOtp />
             <GenerateTokenOtpVerification />
           </div>
         )}
 
         {activeTab === 'rate-limits' && (
-          <div className="flex flex-col gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <UsageInfo />
             <GetResponseContentTokenBucket />
             <GetResponseContentSlidingWindow />

@@ -28,11 +28,9 @@ export default function GenerateTokenOtp() {
   };
 
   return (
-    <SectionWrapper title="Generate OTP For Token" response={response} loading={loading}>
+    <SectionWrapper title="Generate OTP for Token" response={response} loading={loading}>
       <div>
-        <label htmlFor="gen-token-email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
+        <label htmlFor="gen-token-email">Email Address</label>
         <input
           id="gen-token-email"
           type="email"
@@ -40,16 +38,14 @@ export default function GenerateTokenOtp() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
         />
       </div>
 
       <button
         onClick={handleGenerateOtp}
         disabled={loading || !email.trim()}
-        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {loading ? 'Generating...' : 'Generate OTP For Token'}
+        {loading ? 'Generating...' : 'Generate OTP'}
       </button>
     </SectionWrapper>
   );
