@@ -57,7 +57,7 @@ Each microservice has its own dedicated `.md` file for independent repository ma
 ### Using Docker Compose (Recommended)
 To run all services simultaneously with their required databases (MySQL, Redis, Kafka):
 ```bash
-git clone https://github.com/<your-username>/apimeter.git
+git clone https://github.com/ashwinn-si/apimeter.git
 cd apimeter
 docker-compose up --build
 ```
