@@ -1,5 +1,6 @@
 package com.quotaGate.auth_service.Domain;
 
+import com.quotaGate.auth_service.Enums.OTP_ACTIVATION_STATUS;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,13 @@ public class User {
 
     private LocalDateTime otpGeneratedAt;
 
+    private boolean isOTPActive;
+
+    //Since we are using a enum
+    @Enumerated(EnumType.STRING)
+    @Column(name = "otp_activation_status")
+    private OTP_ACTIVATION_STATUS otpActivationReason;
+
     @ManyToOne
     @JoinColumn(name  = "subscription_id")
     private Subscription subscription;
@@ -42,5 +50,7 @@ public class User {
         this.otp = (int)(Math.random() * 10000 + 2000 + (Math.random() * 200));
         this.isVerified = false;
         this.otpGeneratedAt = getCurrentTime();
+        this.isOTPActive = true;
+        this.otpActivationReason = OTP_ACTIVATION_STATUS.ACCOUNT_ACTIVATION;
     }
 }

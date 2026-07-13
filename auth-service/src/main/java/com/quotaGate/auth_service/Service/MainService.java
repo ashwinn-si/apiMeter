@@ -8,6 +8,7 @@ import com.quotaGate.auth_service.Domain.Subscription;
 import com.quotaGate.auth_service.Domain.Usage;
 import com.quotaGate.auth_service.Domain.User;
 
+import com.quotaGate.auth_service.Enums.OTP_ACTIVATION_STATUS;
 import com.quotaGate.auth_service.Repository.SubscriptionRepository;
 import com.quotaGate.auth_service.Repository.UsageRepository;
 import com.quotaGate.auth_service.Repository.UserRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Data
@@ -58,7 +60,6 @@ public class MainService {
     }
 
     @Transactional
-
     public void createUser(String email, Integer subscriptionId) {
 
         if (userService.isUserExists(email)) {
@@ -75,9 +76,13 @@ public class MainService {
         usage = usageRepository.save(usage);
 
         user.setUsage(usage);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        generateOtp(email, "OTP TO Activate Account");
+        sendEmail(
+                email,
+                "OTP to Activate Account",
+                buildOtpEmailBody("Account Activation", savedUser.getOtp())
+        );
     }
 
     public void generateOtpForTokenGeneration(String email, String subject) {
@@ -87,9 +92,15 @@ public class MainService {
             throw new CustomError(HttpStatus.CONFLICT, "User Not Activated");
         }
 
-        Integer otp = userService.generateOtp(email);
+        Integer otp = userService.generateOtp(email, OTP_ACTIVATION_STATUS.TOKEN_GENERATION);
 
-        sendEmail(email, subject, "Your OTPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP: " + otp);
+
+
+        sendEmail(
+                email,
+                subject,
+                buildOtpEmailBody("Token Generation", otp)
+        );
     }
 
     public String checkOtpAndGenerateToken(String email, Integer otp) {
@@ -99,7 +110,7 @@ public class MainService {
             throw new CustomError(HttpStatus.NOT_FOUND, "User NotFound");
         }
 
-        if (!userService.checkOtp(email, otp)) {
+        if (!userService.checkOtp(email, otp, true, OTP_ACTIVATION_STATUS.TOKEN_GENERATION)) {
             throw new CustomError(HttpStatus.CONFLICT, "Invalid Action");
         }
 
@@ -108,18 +119,17 @@ public class MainService {
         return tokenService.generateToken(email, user.getId());
     }
 
+    @Transactional
     public void checkOtpAndActivateAccount(String email, Integer otp) {
-        boolean isUserExists = userService.isUserExists(email);
+        User user = userService.findUserByEmail(email);
 
-        if (!isUserExists) {
-            throw new CustomError(HttpStatus.NOT_FOUND, "User Not Found");
+        if (user.getIsVerified()){
+            throw new CustomError(HttpStatus.CONFLICT, "User Already Verified");
         }
 
-        if (!userService.checkOtp(email, otp)) {
+        if (!userService.checkOtp(email, otp, false, OTP_ACTIVATION_STATUS.ACCOUNT_ACTIVATION)) {
             throw new CustomError(HttpStatus.CONFLICT, "Invalid Action");
         }
-
-        User user = userService.findUserByEmail(email);
 
         user.setIsVerified(true);
 
@@ -135,16 +145,20 @@ public class MainService {
     }
 
 
-    public void generateOtp(String email, String subject) {
+    public void resendOtpForAccountActivation(String email) {
         boolean isUserExists = userService.isUserExists(email);
 
         if (!isUserExists) {
             throw new CustomError(HttpStatus.CONFLICT, "User NotFound");
         }
 
-        Integer otp = userService.generateOtp(email);
+        Integer otp = userService.generateOtp(email, OTP_ACTIVATION_STATUS.ACCOUNT_ACTIVATION);
 
-        sendEmail(email, subject, "Your OTPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP: " + otp);
+        sendEmail(
+                email,
+                "OTP to Activate Account",
+                buildOtpEmailBody("Account Activation", otp)
+        );
     }
 
     private void sendEmail(String toEmail, String subject, String body) {
@@ -155,6 +169,23 @@ public class MainService {
         } catch (Exception e) {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }
+    }
+
+    private String buildOtpEmailBody(String purpose, Integer otp) {
+        return """
+            Hello,
+
+            Your One-Time Password (OTP) for %s is:
+
+            %06d
+
+            This OTP is valid for 5 minutes. Please do not share it with anyone.
+
+            If you did not request this OTP, you can safely ignore this email.
+
+            Regards,
+            QuotaGate Team
+            """.formatted(purpose, otp);
     }
 
 }

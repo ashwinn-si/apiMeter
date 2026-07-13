@@ -64,7 +64,7 @@ public class MainController {
 
     @PostMapping("/public/resend-otp-activation")
     public ResponseEntity<?> generateTokenActivation(@RequestBody @Valid OtpGenerationDTO otpGenerationDTO){
-        mainService.generateOtp(otpGenerationDTO.getEmail(), "OTP to Activate Account");
+        mainService.resendOtpForAccountActivation(otpGenerationDTO.getEmail());
         return ResponseHandler.handleResponse(HttpStatus.OK, null, "Otp Generated Check Email Index / Spam");
     }
 
