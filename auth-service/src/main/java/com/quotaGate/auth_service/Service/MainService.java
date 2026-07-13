@@ -29,10 +29,11 @@ import java.util.Optional;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class SubscriptionDTO{
+class SubscriptionDTO {
     private Integer id;
     private String value;
 }
+
 
 @Service
 @RequiredArgsConstructor
@@ -50,10 +51,12 @@ public class MainService {
     private Integer noTokenAllowed;
 
     public List<SubscriptionDTO> getAllSubscription() {
-        List<Subscription> subscriptionList = subscriptionRepository.findAllByOrderByNoOfAllowedRequest();
+        List<Subscription> subscriptionList =
+                subscriptionRepository.findAllByOrderByNoOfAllowedRequest();
         List<SubscriptionDTO> subscriptionDTOList = new ArrayList<>();
         for (Subscription subscription : subscriptionList) {
-            subscriptionDTOList.add(new SubscriptionDTO(subscription.getId(), subscription.getName()));
+            subscriptionDTOList
+                    .add(new SubscriptionDTO(subscription.getId(), subscription.getName()));
         }
 
         return subscriptionDTOList;
@@ -66,8 +69,8 @@ public class MainService {
             throw new CustomError(HttpStatus.CONFLICT, "User Already Exists");
         }
 
-        Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new CustomError(HttpStatus.NOT_FOUND, "Subscription Not Exists"));
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(
+                () -> new CustomError(HttpStatus.NOT_FOUND, "Subscription Not Exists"));
 
         User user = new User(email, subscription);
         user = userRepository.save(user);
@@ -78,11 +81,8 @@ public class MainService {
         user.setUsage(usage);
         User savedUser = userRepository.save(user);
 
-        sendEmail(
-                email,
-                "OTP to Activate Account",
-                buildOtpEmailBody("Account Activation", savedUser.getOtp())
-        );
+        sendEmail(email, "OTP to Activate Account",
+                buildOtpEmailBody("Account Activation", savedUser.getOtp()));
     }
 
     public void generateOtpForTokenGeneration(String email, String subject) {
@@ -96,11 +96,7 @@ public class MainService {
 
 
 
-        sendEmail(
-                email,
-                subject,
-                buildOtpEmailBody("Token Generation", otp)
-        );
+        sendEmail(email, subject, buildOtpEmailBody("Token Generation", otp));
     }
 
     public String checkOtpAndGenerateToken(String email, Integer otp) {
@@ -123,7 +119,7 @@ public class MainService {
     public void checkOtpAndActivateAccount(String email, Integer otp) {
         User user = userService.findUserByEmail(email);
 
-        if (user.getIsVerified()){
+        if (user.getIsVerified()) {
             throw new CustomError(HttpStatus.CONFLICT, "User Already Verified");
         }
 
@@ -154,11 +150,7 @@ public class MainService {
 
         Integer otp = userService.generateOtp(email, OTP_ACTIVATION_STATUS.ACCOUNT_ACTIVATION);
 
-        sendEmail(
-                email,
-                "OTP to Activate Account",
-                buildOtpEmailBody("Account Activation", otp)
-        );
+        sendEmail(email, "OTP to Activate Account", buildOtpEmailBody("Account Activation", otp));
     }
 
     private void sendEmail(String toEmail, String subject, String body) {
@@ -173,19 +165,19 @@ public class MainService {
 
     private String buildOtpEmailBody(String purpose, Integer otp) {
         return """
-            Hello,
+                Hello,
 
-            Your One-Time Password (OTP) for %s is:
+                Your One-Time Password (OTP) for %s is:
 
-            %06d
+                %06d
 
-            This OTP is valid for 5 minutes. Please do not share it with anyone.
+                This OTP is valid for 5 minutes. Please do not share it with anyone.
 
-            If you did not request this OTP, you can safely ignore this email.
+                If you did not request this OTP, you can safely ignore this email.
 
-            Regards,
-            QuotaGate Team
-            """.formatted(purpose, otp);
+                Regards,
+                ApiMeter Team
+                """.formatted(purpose, otp);
     }
 
 }
