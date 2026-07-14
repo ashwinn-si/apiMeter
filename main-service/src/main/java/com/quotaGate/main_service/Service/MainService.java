@@ -2,12 +2,15 @@ package com.quotaGate.main_service.Service;
 
 import com.quotaGate.main_service.Config.UsageClient;
 import com.quotaGate.main_service.DTO.*;
-import com.quotaGate.main_service.Domain.Usage;
+import com.quotaGate.main_service.Enums.LOG_TYPE;
 import com.quotaGate.main_service.Enums.RATELIMITER;
 import com.quotaGate.main_service.RateLimiter.RateLimiterInterface;
 import com.quotaGate.main_service.RateLimiter.SlidingWindowRateLimiter;
 import com.quotaGate.main_service.RateLimiter.TokenBucketRateLimiter;
+import com.quotaGate.main_service.Utils.AppLogger;
 import com.quotaGate.main_service.Utils.TimeUtil;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +46,6 @@ public class MainService {
     private final TokenService tokenService;
     private final SlidingWindowRateLimiter slidingWindowRateLimiter;
     private final TokenBucketRateLimiter tokenBucketRateLimiter;
-    private final UsageService usageService;
     private final UsageClient usageClient;
 
     @Value("${redis.noTokenAllowed}")
@@ -86,7 +88,15 @@ public class MainService {
         return new ApiResponse("THIS IS WHAT YOU WANTED", redisDTO.getNoTimesUsed());
     }
 
-    private void handleUsageLimitService(Long userId) {
+    @Retry(
+            name = "usageServiceRetry",
+            fallbackMethod = "handleUsageLimitServiceFallBack"
+    )
+    @CircuitBreaker(
+            name = "usageServiceCB",
+            fallbackMethod = "handleUsageLimitServiceFallBack"
+    )
+    public void handleUsageLimitService(Long userId) {
         //calling the microservice
         ResponseEntity<HandleUsageLimitResponse> response = usageClient.handleUsageLimit(userId);
 
@@ -95,7 +105,10 @@ public class MainService {
         if(responseBody.isError()){
             throw  new CustomError(HttpStatus.CONFLICT, responseBody.getMessage(), responseBody);
         }
+    }
 
+    private void handleUsageLimitServiceFallBack(Exception ex){
+        AppLogger.log(LOG_TYPE.INFO, "main-serivce", "Error from the usage-microservice: " + ex.getMessage());
     }
 
 }

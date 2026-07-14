@@ -1,0 +1,6 @@
+- api-gateway -> 8080
+- auth-service -> 8085
+- email-service -> 8090
+- eureka-server -> 8761
+- main-service -> 8081
+- usage-service -> 8089

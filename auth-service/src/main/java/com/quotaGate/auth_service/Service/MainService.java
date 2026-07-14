@@ -8,10 +8,14 @@ import com.quotaGate.auth_service.Domain.Subscription;
 import com.quotaGate.auth_service.Domain.Usage;
 import com.quotaGate.auth_service.Domain.User;
 
+import com.quotaGate.auth_service.Enums.LOG_TYPE;
 import com.quotaGate.auth_service.Enums.OTP_ACTIVATION_STATUS;
 import com.quotaGate.auth_service.Repository.SubscriptionRepository;
 import com.quotaGate.auth_service.Repository.UsageRepository;
 import com.quotaGate.auth_service.Repository.UserRepository;
+import com.quotaGate.auth_service.Utils.AppLogger;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -153,6 +157,14 @@ public class MainService {
         sendEmail(email, "OTP to Activate Account", buildOtpEmailBody("Account Activation", otp));
     }
 
+    @Retry(
+            name = "emailServiceRetry",
+            fallbackMethod = "handleEmailServiceFallBack"
+    )
+    @CircuitBreaker(
+            name = "emailServiceCB",
+            fallbackMethod = "handleEmailServiceFallBack"
+    )
     private void sendEmail(String toEmail, String subject, String body) {
         try {
             SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
@@ -161,6 +173,10 @@ public class MainService {
         } catch (Exception e) {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }
+    }
+
+    private void handleEmailServiceFallBack(Exception ex){
+        AppLogger.log(LOG_TYPE.INFO, "main-serivce", "Error from the usage-microservice: " + ex.getMessage());
     }
 
     private String buildOtpEmailBody(String purpose, Integer otp) {

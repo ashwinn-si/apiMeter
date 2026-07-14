@@ -7,11 +7,11 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
   datasource:
-    url: jdbc:mysql://localhost:3306/rateLimiter
+    url: jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
     username: root
     password: YOUR_DB_PASSWORD
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -40,12 +40,12 @@ management:
 
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: http://zipkin:9411/api/v2/spans
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
 
 jwt:
   secret: YOUR_JWT_SECRET_KEY
@@ -57,3 +57,30 @@ redis:
   noTokenAllowed: 5
   tokenBucket:
     noTokenPerMin: 1
+
+resilience4j:
+  retry:
+    instances:
+      emailServiceRetry:
+        max-attempts: 4
+        wait-duration: 30s
+        enable-exponential-backoff: false
+        retry-exceptions:
+          - feign.RetryableException
+          - feign.FeignException
+          - com.quotaGate.auth_service.DTO.CustomError
+
+  circuitbreaker:
+    instances:
+      emailServiceCB:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 3
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - feign.RetryableException
+          - feign.FeignException
+          - com.quotaGate.main_service.DTO.CustomError

@@ -6,13 +6,16 @@ import com.quotaGate.usage_service.DTO.JwtDTO;
 import com.quotaGate.usage_service.DTO.UsageDTO;
 import com.quotaGate.usage_service.DTO.SendEmailDTO;
 import com.quotaGate.usage_service.Domain.Usage;
-import com.quotaGate.usage_service.Domain.User;
+import com.quotaGate.usage_service.Enums.LOG_TYPE;
+import com.quotaGate.usage_service.Utils.AppLogger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 
 
@@ -108,6 +111,8 @@ public class MainService {
         return usageService.refreshValueAndGetData(userId);
     }
 
+    @Retry(name = "emailServiceRetry", fallbackMethod = "handleEmailServiceFallBack")
+    @CircuitBreaker(name = "emailServiceCB", fallbackMethod = "handleEmailServiceFallBack")
     private void sendEmail(String toEmail, String subject, String body) {
         try {
             SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
@@ -116,6 +121,11 @@ public class MainService {
         } catch (Exception e) {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }
+    }
+
+    private void handleEmailServiceFallBack(Exception ex) {
+        AppLogger.log(LOG_TYPE.INFO, "main-serivce",
+                "Error from the usage-microservice: " + ex.getMessage());
     }
 
 }

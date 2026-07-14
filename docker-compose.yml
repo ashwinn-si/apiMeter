@@ -1,13 +1,18 @@
 name: api-meter
 
 services:
+
+  ####################################
+  # Infrastructure
+  ####################################
+
   redis:
     image: redis:alpine
     container_name: redis
-    ports:
-      - "6379:6379"
     command: >
       redis-server --notify-keyspace-events Ex
+    ports:
+      - "6379:6379"
     restart: unless-stopped
 
   mysql:
@@ -23,6 +28,170 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  ####################################
+  # Distributed Tracing
+  ####################################
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+
+  ####################################
+  # Eureka
+  ####################################
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    depends_on:
+      - mysql
+      - redis
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  ####################################
+  # Email Service
+  ####################################
+
+  email-service:
+    build:
+      context: ./email-service
+    container_name: email-service
+    ports:
+      - "8090:8090"
+    depends_on:
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  ####################################
+  # Auth Service
+  ####################################
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - eureka-server
+      - mysql
+      - redis
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  ####################################
+  # Main Service
+  ####################################
+
+  main-service:
+    build:
+      context: ./main-service
+    container_name: main-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - auth-service
+      - redis
+      - mysql
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  ####################################
+  # Usage Service
+  ####################################
+
+  usage-service:
+    build:
+      context: ./usage-service
+    container_name: usage-service
+    ports:
+      - "8089:8089"
+    depends_on:
+      - eureka-server
+      - auth-service
+      - redis
+      - mysql
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  ####################################
+  # API Gateway
+  ####################################
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - main-service
+      - usage-service
+      - email-service
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATA_REDIS_HOST=redis
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+    container_name: client
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
 
 volumes:
   mysql_data:
