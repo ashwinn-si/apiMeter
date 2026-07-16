@@ -7,6 +7,7 @@ import com.quotaGate.usage_service.DTO.UsageDTO;
 import com.quotaGate.usage_service.DTO.SendEmailDTO;
 import com.quotaGate.usage_service.Domain.Usage;
 import com.quotaGate.usage_service.Enums.LOG_TYPE;
+import com.quotaGate.usage_service.Kafka.Publisher.EmailPublisher;
 import com.quotaGate.usage_service.Utils.AppLogger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,6 +47,7 @@ public class MainService {
     private final EmailClient emailClient;
     private final UsageService usageService;
     private final TokenService tokenService;
+    private final EmailPublisher emailPublisher;
 
     public UsageLimitResponse usageLimitInfo(String token) {
         JwtDTO jwtDTO = tokenService.getJwtClaims(token);
@@ -115,9 +117,10 @@ public class MainService {
     @CircuitBreaker(name = "emailServiceCB", fallbackMethod = "handleEmailServiceFallBack")
     private void sendEmail(String toEmail, String subject, String body) {
         try {
-            SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
-            emailClient.sendMail(sendEmailDTO);
+            // SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
+            // emailClient.sendMail(sendEmailDTO);
 
+            emailPublisher.publishEmail(toEmail, subject, body);
         } catch (Exception e) {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }

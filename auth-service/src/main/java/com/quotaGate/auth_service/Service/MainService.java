@@ -10,6 +10,7 @@ import com.quotaGate.auth_service.Domain.User;
 
 import com.quotaGate.auth_service.Enums.LOG_TYPE;
 import com.quotaGate.auth_service.Enums.OTP_ACTIVATION_STATUS;
+import com.quotaGate.auth_service.Kafka.Publisher.EmailPublisher;
 import com.quotaGate.auth_service.Repository.SubscriptionRepository;
 import com.quotaGate.auth_service.Repository.UsageRepository;
 import com.quotaGate.auth_service.Repository.UserRepository;
@@ -49,6 +50,7 @@ public class MainService {
     private final SubscriptionRepository subscriptionRepository;
     private final UsageRepository usageRepository;
     private final SubscriptionSeeder subscriptionSeeder;
+    private final EmailPublisher emailPublisher;
 
 
     @Value("${redis.noTokenAllowed}")
@@ -157,6 +159,24 @@ public class MainService {
         sendEmail(email, "OTP to Activate Account", buildOtpEmailBody("Account Activation", otp));
     }
 
+//    @Retry(
+//            name = "emailServiceRetry",
+//            fallbackMethod = "handleEmailServiceFallBack"
+//    )
+//    @CircuitBreaker(
+//            name = "emailServiceCB",
+//            fallbackMethod = "handleEmailServiceFallBack"
+//    )
+//    private void sendEmail(String toEmail, String subject, String body) {
+//        try {
+//            SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
+//            emailClient.sendMail(sendEmailDTO);
+//
+//        } catch (Exception e) {
+//            throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
+//        }
+//    }
+
     @Retry(
             name = "emailServiceRetry",
             fallbackMethod = "handleEmailServiceFallBack"
@@ -167,13 +187,12 @@ public class MainService {
     )
     private void sendEmail(String toEmail, String subject, String body) {
         try {
-            SendEmailDTO sendEmailDTO = new SendEmailDTO(toEmail, subject, body);
-            emailClient.sendMail(sendEmailDTO);
-
+            emailPublisher.publishEmail(toEmail, subject, body);
         } catch (Exception e) {
             throw new CustomError(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
 
     private void handleEmailServiceFallBack(Exception ex){
         AppLogger.log(LOG_TYPE.INFO, "main-serivce", "Error from the usage-microservice: " + ex.getMessage());

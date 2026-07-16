@@ -32,10 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         try {
 
@@ -76,8 +74,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 @Override
                 public Enumeration<String> getHeaders(String name) {
                     if ("X-User-Email".equalsIgnoreCase(name)) {
-                        return Collections.enumeration(
-                                Collections.singletonList(jwtDTO.getEmail()));
+                        return Collections
+                                .enumeration(Collections.singletonList(jwtDTO.getEmail()));
                     }
                     if ("X-User-Id".equalsIgnoreCase(name)) {
                         return Collections.enumeration(
@@ -88,7 +86,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 @Override
                 public Enumeration<String> getHeaderNames() {
-                    Set<String> names = new LinkedHashSet<>(Collections.list(super.getHeaderNames()));
+                    Set<String> names =
+                            new LinkedHashSet<>(Collections.list(super.getHeaderNames()));
                     names.add("X-User-Email");
                     names.add("X-User-Id");
                     return Collections.enumeration(names);

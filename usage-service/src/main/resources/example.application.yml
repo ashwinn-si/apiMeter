@@ -11,7 +11,7 @@ spring:
       port: 6379
 
   datasource:
-    url: jdbc:mysql://mysql:3306/api_meter?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/api_meter?createDatabaseIfNotExist=true
     username: root
     password: YOUR_DB_PASSWORD
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -40,12 +40,12 @@ management:
 
   zipkin:
     tracing:
-      endpoint: http://zipkin:9411/api/v2/spans
+      endpoint: http://localhost:9411/api/v2/spans
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 jwt:
   secret: YOUR_JWT_SECRET_KEY
